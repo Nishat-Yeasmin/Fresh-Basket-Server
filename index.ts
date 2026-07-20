@@ -38,7 +38,8 @@ interface AuthRequest extends express.Request {
 app.use(
  cors({
    origin:[
-     "http://localhost:3000"
+     "http://localhost:3000",
+     "https://fresh-basket-xi.vercel.app"
    ],
    credentials:true
  })
@@ -353,29 +354,29 @@ res.json(products);
 
 });
 
-app.delete(
-"/api/products/:id",
-verifyToken,
-async(req:AuthRequest,res)=>{
+// app.delete(
+// "/api/products/:id",
+// verifyToken,
+// async(req:AuthRequest,res)=>{
 
 
-await Product.findOneAndDelete({
+// await Product.findOneAndDelete({
 
-_id:req.params.id,
+// _id:req.params.id,
 
-seller:req.user?.id
+// seller:req.user?.id
 
-});
-
-
-res.json({
-
-message:"Deleted"
-
-});
+// });
 
 
-});
+// res.json({
+
+// message:"Deleted"
+
+// });
+
+
+// });
 
 app.get("/api/dashboard/stats", async (req, res) => {
   try {
@@ -559,23 +560,12 @@ expiresIn:"7d"
 
 );
 
-res.cookie(
-"token",
-token,
-{
-
-httpOnly:true,
-
-secure:false,
-
-sameSite:"lax",
-
-maxAge:
-7*24*60*60*1000
-
-}
-
-);
+res.cookie("token", token, {
+  httpOnly:true,
+  secure:true,
+  sameSite:"none",
+  maxAge:7 * 24 * 60 * 60 * 1000,
+});
 
 res.json({
 
@@ -685,6 +675,60 @@ message:"Logout successful"
 
 });
 
+
+});
+
+app.post(
+"/api/ai/generate-description",
+async(req,res)=>{
+
+try{
+
+const {
+title,
+category,
+shortDescription,
+length
+}=req.body;
+
+
+if(!title){
+
+return res.status(400).json({
+message:"Title required"
+});
+
+}
+
+
+// temporary AI response
+const description = `
+${title} is a premium quality ${category} product.
+
+${shortDescription}
+
+This product is fresh, reliable and perfect for customers.
+Enjoy excellent quality and great value with FreshBasket.
+`;
+
+
+res.json({
+
+description
+
+});
+
+
+}
+catch(error){
+
+console.log(error);
+
+res.status(500).json({
+message:"AI generation failed"
+});
+
+}
 
 });
 
